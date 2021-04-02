@@ -1,0 +1,24 @@
+---
+title: "Project Part 02"
+author: "Dominic Henry | Dieanh Cohen"
+date: "4/2/2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+## Authors' Information
+
+- Dominic Henry - 620118591   
+- Dineah Coehn - 
+
+## Tweet Data Analysis
+
+## Preparing consumer structured data
+
+## Structured Data Analysis/Modeling
+
+## Recommendations
+
+## Beverage unit Prediction

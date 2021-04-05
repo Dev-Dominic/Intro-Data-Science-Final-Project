@@ -1,0 +1,334 @@
+---
+title: "Project-01"
+author: "Dominic Henry"
+date: "3/8/2021"
+geometry: margin=2cm
+output: pdf_document
+---
+
+## Setting up twitter api with twitteR
+ 
+```{r}
+
+# install.packages("twitteR")
+library("twitteR")
+
+consumer_key <- 'Ch9jskjCH77J7fCyfSqClPlK5'
+consumer_secret <- 'PDRion0it91KJ4FAvGoCWhveyIVfsuZYPDz4jclriHy0zbxf6l'
+
+access_token <- '1588970316-6ABtNLKgBCoDNS5fq4bLAcf27F1UmRx74XNiPqF'
+access_secret <- 'PFemqiLO0WyqLmBAHDZMm7YF2smbLSC1GTEKtFeEw7GV8'
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+```
+
+### Note
+
+When using the twitteR package function searchTwitter it allows for the selection
+flag that only retrieves tweets of a given language. Thus for task two no additional filtering for English tweets was necessary. 
+
+### Retrieving tweets with the word "beverage" and Cleaning (March 8, 2021)
+
+```{r}
+
+# beverageTweets <- searchTwitter("beverage", n=8000, lang="en")
+# beverageTweetsDf <- twListToDF(beverageTweets)
+head(beverageTweetsDf, 5)
+
+```
+
+### Retrieving tweets with the word "party" and Cleaning (March 9, 2021)
+
+```{r}
+
+# partyTweets <- searchTwitter("party", n=8000, lang="en")
+# partyTweetsDf <- twListToDF(partyTweets)
+head(partyTweetsDf, 5)
+
+```
+
+### Retrieving Tweets with the word "beer" and Cleaning (March 13, 2021)
+
+```{r}
+
+# beerTweets <- searchTwitter("beer", n=8000, lang="en")
+# beerTweetsDf <- twListToDF(beerTweets)
+head(beerTweetsDf, 5)
+
+```
+
+### Retrieving Tweets with the word "concert" and Cleaning (March 14, 2021)
+
+```{r}
+
+# concertTweets <- searchTwitter("concert", n=8000, lang="en")
+# concertTweetsDf <- twListToDF(concertTweets)
+head(concertTweetsDf, 5)
+
+```
+
+
+### Retriving additional user related data.
+
+twitteR does not include certain user data with given tweets, so I used an additional function to facilitate getting and appending user information for each tweet.
+
+**Removing all duplicate tweets for each dataset**
+
+Utilizing tidyverse/dplyr to remove all duplicate tweets from each datasets.
+Removing duplicates prior to requesting additional user data should reduce the amount of requests made to Twitter's API.
+```{r}
+library(tidyverse)
+
+beverageTweetsDf <- beverageTweetsDf %>% distinct(text, .keep_all = TRUE)
+print(paste("Beverage Tweets Duplicates: ", 8000 - nrow(beverageTweetsDf)))
+
+partyTweetsDf <- partyTweetsDf %>% distinct(text, .keep_all = TRUE)
+print(paste("Party Tweets Duplicates: ", 8000 - nrow(partyTweetsDf)))
+
+beerTweetsDf <- beerTweetsDf %>% distinct(text, .keep_all = TRUE)
+print(paste("Beer Tweets Duplicates: ", 8000 - nrow(beerTweetsDf)))
+
+concertTweetsDf <- concertTweetsDf %>% distinct(text, .keep_all = TRUE)
+print(paste("Concert Tweets Duplicates: ", 8000 - nrow(concertTweetsDf)))
+
+```
+
+**Creating new columns needed**
+
+```{r}
+
+beverageTweetsDf$location <- NA
+beverageTweetsDf$followers_count <- NA
+beverageTweetsDf$friends_count <- NA
+beverageTweetsDf$account_lang <- NA
+
+partyTweetsDf$location <- NA
+partyTweetsDf$followers_count <- NA
+partyTweetsDf$friends_count <- NA
+partyTweetsDf$account_lang <- NA
+
+beerTweetsDf$location <- NA
+beerTweetsDf$followers_count <- NA
+beerTweetsDf$friends_count <- NA
+beerTweetsDf$account_lang <- NA
+
+concertTweetsDf$location <- NA
+concertTweetsDf$followers_count <- NA
+concertTweetsDf$friends_count <- NA
+concertTweetsDf$account_lang <- NA
+
+```
+
+**Getting user details for each dataset**
+
+Utilizing lookUpUsers function from twitteR package for each dataset. 
+
+```{r}
+
+beverageUsersInfoDf <- twListToDF(lookupUsers(beverageTweetsDf$screenName))
+head(beverageUsersInfoDf, 5)
+
+partyUsersInfoDf <- twListToDF(lookupUsers(partyTweetsDf$screenName))
+head(partyUsersInfoDf, 5)
+
+beerUsersInfoDf <- twListToDF(lookupUsers(beerTweetsDf$screenName))
+head(beerUsersInfoDf, 5)
+
+concertUsersInfoDf <- twListToDF(lookupUsers(concertTweetsDf$screenName))
+head(concertUsersInfoDf, 5)
+
+```
+
+**Binding data from each userinfo data frame with tweets data frame**
+
+If a given user is not found, then all user related data retrieved will be marked with *NA*.
+Iterating over the smaller user list should make populating initial list of tweets faster. 
+
+```{r}
+
+# beverageTweetsDf
+for(screenName in beverageUsersInfoDf$screenName){
+  filterRows <- beverageTweetsDf$screenName == screenName
+  user <- beverageUsersInfoDf[beverageUsersInfoDf$screenName == screenName,]
+  
+  beverageTweetsDf[filterRows,]$location <- user$location
+  beverageTweetsDf[filterRows,]$followers_count <- user$followersCount
+  beverageTweetsDf[filterRows,]$friends_count <- user$friendsCount
+  beverageTweetsDf[filterRows,]$account_lang <- user$lang
+}
+
+# partyTweetsDf
+for(screenName in partyUsersInfoDf$screenName){
+  filterRows <- partyTweetsDf$screenName == screenName
+  user <- partyUsersInfoDf[partyUsersInfoDf$screenName == screenName,]
+  
+  partyTweetsDf[filterRows,]$location <- user$location
+  partyTweetsDf[filterRows,]$followers_count <- user$followersCount
+  partyTweetsDf[filterRows,]$friends_count <- user$friendsCount
+  partyTweetsDf[filterRows,]$account_lang <- user$lang
+}
+
+# beerTweetsDf
+for(screenName in beerUsersInfoDf$screenName){
+  filterRows <- beerTweetsDf$screenName == screenName
+  user <- beerUsersInfoDf[beerUsersInfoDf$screenName == screenName,]
+  
+  beerTweetsDf[filterRows,]$location <- user$location
+  beerTweetsDf[filterRows,]$followers_count <- user$followersCount
+  beerTweetsDf[filterRows,]$friends_count <- user$friendsCount
+  beerTweetsDf[filterRows,]$account_lang <- user$lang
+}
+
+# concertTweetsDf
+for(screenName in concertUsersInfoDf$screenName){
+  filterRows <- concertTweetsDf$screenName == screenName
+  user <- concertUsersInfoDf[concertUsersInfoDf$screenName == screenName,]
+  
+  concertTweetsDf[filterRows,]$location <- user$location
+  concertTweetsDf[filterRows,]$followers_count <- user$followersCount
+  concertTweetsDf[filterRows,]$friends_count <- user$friendsCount
+  concertTweetsDf[filterRows,]$account_lang <- user$lang
+}
+
+head(beverageTweetsDf, 5)
+head(partyTweetsDf, 5)
+head(beerTweetsDf, 5)
+head(concertTweetsDf, 5)
+
+```
+
+### Extracting only neccessary columns from dataset
+
+**Changing field names to camel case**
+
+```{r}
+
+beverageTweetsDf$screen_name <-  beverageTweetsDf$screenName
+beverageTweetsDf$user_id <- beverageTweetsDf$id
+beverageTweetsDf$created_at <- beverageTweetsDf$created
+beverageTweetsDf$favourite_count <- beverageTweetsDf$favoriteCount
+beverageTweetsDf$retweet_count <- beverageTweetsDf$retweetCount
+
+partyTweetsDf$screen_name <-  partyTweetsDf$screenName
+partyTweetsDf$user_id <- partyTweetsDf$id
+partyTweetsDf$created_at <- partyTweetsDf$created
+partyTweetsDf$favourite_count <- partyTweetsDf$favoriteCount
+partyTweetsDf$retweet_count <- partyTweetsDf$retweetCount
+
+beerTweetsDf$screen_name <-  beerTweetsDf$screenName
+beerTweetsDf$user_id <- beerTweetsDf$id
+beerTweetsDf$created_at <- beerTweetsDf$created
+beerTweetsDf$favourite_count <- beerTweetsDf$favoriteCount
+beerTweetsDf$retweet_count <- beerTweetsDf$retweetCount
+
+concertTweetsDf$screen_name <-  concertTweetsDf$screenName
+concertTweetsDf$user_id <- concertTweetsDf$id
+concertTweetsDf$created_at <- concertTweetsDf$created
+concertTweetsDf$favourite_count <- concertTweetsDf$favoriteCount
+concertTweetsDf$retweet_count <- concertTweetsDf$retweetCount
+
+```
+
+**Extracting key features from each group tweets**
+
+```{r}
+
+key_features <- c("text", "screen_name", "user_id", "created_at", 
+                  "favourite_count", "retweet_count", "location", 
+                  "followers_count", "friends_count", "account_lang")
+
+```
+
+
+
+```{r}
+
+beverageTweetsDf <- beverageTweetsDf[,key_features]
+head(beverageTweetsDf)
+
+partyTweetsDf <- partyTweetsDf[,key_features]
+head(partyTweetsDf)
+
+beerTweetsDf <- beerTweetsDf[,key_features]
+head(beerTweetsDf)
+
+concertTweetsDf <- concertTweetsDf[,key_features]
+head(concertTweetsDf)
+
+```
+
+### Storing datasets to csv file
+
+```{r}
+
+write.csv(beverageTweetsDf, 'beverage_2021Mar08_DominicHenry.csv')
+write.csv(partyTweetsDf, 'party_2021Mar09_DominicHenry.csv')
+write.csv(beerTweetsDf, 'beer_2021Mar13_DominicHenry.csv')
+write.csv(concertTweetsDf, 'concert_2021Mar14_DominicHenry.csv')
+
+```
+
+### Tweets Dataset Details
+
+**Create function show details for each tweet dataset**
+
+```{r}
+
+tweetDatasetDetails <- function(df){
+  dataframeName <- deparse(substitute(df))
+  
+  print(dataframeName)
+  print(paste("Number of tweets in ", dataframeName, ": ", nrow(df)))
+  
+  # User with screen name with most followers
+  max_followers_count <- max(df$followers_count, na.rm = TRUE)
+  screen_name_max_followers_count <- df[
+    (df$followers_count == max_followers_count &
+       !is.na(df$followers_count)),]$screen_name
+  
+  print(
+    paste(
+      "Most followers ", 
+      max_followers_count, 
+      " in ", dataframeName, ": ", 
+      screen_name_max_followers_count))
+  
+  # User with screen name with most retweets
+  max_retweet_count <- max(df$retweet_count, na.rm = TRUE)
+  screen_name_max_retweet_count <- df[
+    (df$retweet_count == max_retweet_count &
+       !is.na(df$retweet_count)),]$screen_name
+  
+  print(
+    paste(
+      "Most Retweets ", 
+      max_retweet_count, " in ", 
+      dataframeName, ": ", screen_name_max_retweet_count))
+  
+  
+  # Location with with the most tweets.
+  # The first value will most likely be Missing Values
+  # Thus the second value will contain the location with the most 
+  # amount of tweets for the dataset
+  location_tweets <- df %>% filter(!is.na(location)) %>% count(location, sort = TRUE)
+  print(paste(
+    "Location with most tweets being ", 
+    location_tweets[2,]$n,"is: ", 
+    location_tweets[2,]$location))
+  
+  
+}
+
+```
+
+**Dataset Details**
+
+```{r}
+
+tweetDatasetDetails(beverageTweetsDf)
+tweetDatasetDetails(partyTweetsDf)
+tweetDatasetDetails(beerTweetsDf)
+tweetDatasetDetails(concertTweetsDf)
+
+```

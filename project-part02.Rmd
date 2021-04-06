@@ -1,6 +1,6 @@
 ---
 title: "Project Part 02"
-author: "Dominic Henry | Dieanh Cohen"
+author: "Dominic Henry | Dineah Cohen"
 date: "4/2/2021"
 output:
   pdf_document: default
@@ -11,9 +11,54 @@ output:
 ## Authors' Information
 
 - Dominic Henry - 620118591   
-- Dineah Coehn - 
+- Dineah Cohen - 620117662
 
 ## Tweet Data Analysis
+
+## Making columns identical for Beverage tweets
+```{r}
+beverageDF1 <- beverageDF1[1:10]
+beverageDF2 <- beverageDF2[1:10]
+
+names(beverageDF1)[6] <- "favourite_count"
+```
+
+## Making columns identical for Beer tweets
+```{r}
+beerDF1 <- beerDF1[1:10]
+beerDF2 <- beerDF2[1:10]
+
+names(beerDF1)[6] <- "favourite_count"
+```
+
+## Making columns identical for Concert tweets
+```{r}
+concertDF1 <- concertDF1[1:10]
+concertDF2 <- concertDF2[1:10]
+
+names(concertDF1)[6] <- "favourite_count"
+```
+
+## Making columns identical for Party tweets
+```{r}
+partyDF1 <- partyDF1[1:10]
+partyDF2 <- partyDF2[1:10]
+
+names(partyDF1)[6] <- "favourite_count"
+```
+
+## Merging datasets
+```{r}
+mergedBeverageTweets<- rbind(beverageDF1, beverageDF2)
+mergedBeerTweets <- rbind(beerDF1, beerDF2)
+mergedConcertTweets<- rbind(concertDF1, concertDF2)
+mergedPartyTweets <- rbind(partyDF1, partyDF2)
+```
+
+#Removing duplicate tweets
+
+#Descriptive Statistics
+
 
 ## Preparing consumer structured data
 

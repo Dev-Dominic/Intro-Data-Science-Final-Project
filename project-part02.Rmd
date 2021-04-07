@@ -14,6 +14,11 @@ output:
 - Dineah Cohen - 620117662
 
 ## Tweet Data Analysis
+```{r}
+library("SnowballC")
+library("tm")
+library("syuzhet")
+```
 
 ## Making columns identical for Beverage tweets
 ```{r}
@@ -47,7 +52,7 @@ partyDF2 <- partyDF2[1:10]
 names(partyDF1)[6] <- "favourite_count"
 ```
 
-## Merging datasets
+# Merging datasets
 ```{r}
 mergedBeverageTweets<- rbind(beverageDF1, beverageDF2)
 mergedBeerTweets <- rbind(beerDF1, beerDF2)
@@ -55,9 +60,123 @@ mergedConcertTweets<- rbind(concertDF1, concertDF2)
 mergedPartyTweets <- rbind(partyDF1, partyDF2)
 ```
 
-#Removing duplicate tweets
 
-#Descriptive Statistics
+# Removing duplicate tweets
+```{r}
+library(tidyverse)
+mergedBeerTweets <- mergedBeerTweets[!duplicated(mergedBeerTweets$text),]
+mergedBeverageTweets <- mergedBeverageTweets[!duplicated(mergedBeerTweets$text),]
+mergedConcertTweets <- mergedConcertTweets[!duplicated(mergedConcertTweets$text),]
+mergedPartyTweets <- mergedPartyTweets[!duplicated(mergedPartyTweets$text),]
+```
+
+
+# Descriptive Statistics
+
+## Concert statistics
+```{r}
+summary(mergedConcertTweets)
+```
+
+## Beer statistics
+```{r}
+summary(mergedBeerTweets)
+```
+
+## Beverage statistics
+```{r}
+summary(mergedBeverageTweets)
+```
+
+## Party statistics
+```{r}
+summary(mergedPartyTweets)
+```
+
+# Sentiment Analysis
+
+## Dominant Emotion in Canada
+```{r}
+canadaTweets <- mergedBeverageTweets[mergedBeverageTweets$location == 'Canada', "text"]
+canadaTweets <- gsub("https.*","", canadaTweets)
+canadaTweets <- gsub("#.*","", canadaTweets)
+canadaTweets <- gsub("@.*","", canadaTweets)
+canadaTweets <- gsub("[^\x01-\x7F]", "", canadaTweets)
+canadaEmotions <- get_nrc_sentiment(canadaTweets)
+
+canadaTweets.data <- cbind (canadaTweets, canadaEmotions)
+
+canada.anticipation <- sum(canadaEmotions$anticipation)
+canada.anger <- sum(canadaEmotions$anger)
+canada.disgust <- sum(canadaEmotions$disgust)
+canada.fear <- sum(canadaEmotions$fear)
+canada.joy <- sum(canadaEmotions$joy)
+canada.sadness <- sum(canadaEmotions$sadness)
+canada.surprise <- sum(canadaEmotions$surprise)
+canada.trust <- sum(canadaEmotions$trust)
+```
+
+These results indicate that the dominant emotions in Canada are Trust and Joy, the scores were 12 and 11 respectively. 
+
+## Dominant Emotion in the United States
+```{r}
+unitedStatesTweets <- mergedBeverageTweets[mergedBeverageTweets$location == 'United States', "text"]
+unitedStatesTweets <- gsub("https.*","", unitedStatesTweets)
+unitedStatesTweets <- gsub("#.*","", unitedStatesTweets)
+unitedStatesTweets <- gsub("@.*","", unitedStatesTweets)
+unitedStatesTweets <- gsub("[^\x01-\x7F]", "", unitedStatesTweets)
+unitedStatesEmotions <- get_nrc_sentiment(unitedStatesTweets)
+
+unitedStatesTweets.data <- cbind (unitedStatesTweets, unitedStatesEmotions)
+
+unitedStates.anticipation <- sum(unitedStatesEmotions$anticipation)
+unitedStates.anger <- sum(unitedStatesEmotions$anger)
+unitedStates.disgust <- sum(unitedStatesEmotions$disgust)
+unitedStates.fear <- sum(unitedStatesEmotions$fear)
+unitedStates.joy <- sum(unitedStatesEmotions$joy)
+unitedStates.sadness <- sum(unitedStatesEmotions$sadness)
+unitedStates.surprise <- sum(unitedStatesEmotions$surprise)
+unitedStates.trust <- sum(unitedStatesEmotions$trust)
+```
+
+These results indicate that the dominant emotions in Canada are Trust and Joy, both scores were 50.
+
+## Dominant emotion in beverage dataset
+```{r}
+beverageDf.text <- gsub("http.*","",mergedBeverageTweets$text)
+beverageDf.text <- gsub("https.*","", beverageDf.text)
+beverageDf.text <- gsub("#.*","", beverageDf.text)
+beverageDf.text <- gsub("@.*","", beverageDf.text)
+beverageDf.text <- gsub("[^\x01-\x7F]", "", beverageDf.text)
+beverageDf.emotions <- get_nrc_sentiment(beverageDf.text)
+```
+
+```{r}
+colSums(beverageDf.emotions)
+```
+According to the column sums, the dominant emotions in the Beverage dataset are Trust and Joy.
+
+## Overall sentiments in tweets regarding the word "beverage"
+```{r}
+beverageSentiment <- mean(get_sentiment(beverageDf.text))
+print(beverageSentiment)
+```
+From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0. 
+
+
+## Overall sentiments in tweets regarding the word "concert"
+```{r}
+concertDF.text <- gsub("http.*","",mergedConcertTweets$text)
+concertDF.text <- gsub("https.*","", concertDF.text)
+concertDF.text <- gsub("#.*","", concertDF.text)
+concertDF.text <- gsub("@.*","", concertDF.text)
+concertDF.text <- gsub("[^\x01-\x7F]", "", concertDF.text)
+
+concertSentiment <- mean(get_sentiment(concertDF.text))
+print(concertSentiment)
+```
+From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0. 
+
 
 
 ## Preparing consumer structured data

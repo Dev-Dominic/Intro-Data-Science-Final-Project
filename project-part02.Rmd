@@ -468,4 +468,7 @@ for (country in uniqueCountries){
 
 ## Recommendations
 
+Based on the findings, the recommendation for Hard Knocks would be to open their new establishment in Yemen which is country is Western Asia. This is due to the fact that off all the countries in the structured analysis, Yemen has the highest consumption as well as the highest spending cost of beverages. Additionally, based on tweet analysis it was found that the dominant emotion towards beverages was trust and joy followed by anticipation. The overall sentiment was positive. There is a high chance that this would result in high profits for the company. 
+
+
 ## Beverage unit Prediction

@@ -376,6 +376,17 @@ Missing values have been removed, and dataset columns have been formatted.
 
 ## Structured Data Analysis/Modeling
 
+Filtering out Consumer Categories to only have beverages.
+
+```{r}
+
+consumerDF <- consumerDF[consumerDF$Consumer.Category == "Beverages",]
+nrow(consumerDF)
+
+```
+
+Number of records that fall under Beverages category is: `r nrow(consumerDF)`
+
 ## Recommendations
 
 ## Beverage unit Prediction

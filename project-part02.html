@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Dominic Henry | Dieanh Cohen" />
+<meta name="author" content="Dominic Henry | Dineah Cohen" />
 
 
 <title>Project Part 02</title>
@@ -167,7 +167,7 @@ pre code {
 
 
 <h1 class="title toc-ignore">Project Part 02</h1>
-<h4 class="author">Dominic Henry | Dieanh Cohen</h4>
+<h4 class="author">Dominic Henry | Dineah Cohen</h4>
 <h4 class="date">4/2/2021</h4>
 
 </div>
@@ -178,11 +178,275 @@ pre code {
 <ul>
 <li>Dominic Henry - 620118591<br />
 </li>
-<li>Dineah Coehn -</li>
+<li>Dineah Cohen - 620117662</li>
 </ul>
 </div>
 <div id="tweet-data-analysis" class="section level2">
 <h2>Tweet Data Analysis</h2>
+<pre class="r"><code>library(&quot;SnowballC&quot;)
+library(&quot;tm&quot;)</code></pre>
+<pre><code>## Loading required package: NLP</code></pre>
+<pre class="r"><code>library(&quot;syuzhet&quot;)</code></pre>
+</div>
+<div id="reading-datasets" class="section level2">
+<h2>Reading Datasets</h2>
+<pre class="r"><code>beverageDF1 &lt;- read.csv(&quot;datasets/beverage_2021Mar08_DominicHenry.csv&quot;)
+beverageDF2 &lt;- read.csv(&quot;datasets/beverage_2021Mar13_Cohen.csv&quot;)
+
+beerDF1 &lt;- read.csv(&quot;datasets/beer_2021Mar13_DominicHenry.csv&quot;)
+beerDF2 &lt;- read.csv(&quot;datasets/beer_2021Mar08_Cohen.csv&quot;)
+
+concertDF1 &lt;- read.csv(&quot;datasets/concert_2021Mar14_DominicHenry.csv&quot;)
+concertDF2 &lt;- read.csv(&quot;datasets/concert_2021Mar14_Cohen.csv&quot;)
+
+partyDF1 &lt;- read.csv(&quot;datasets/party_2021Mar09_DominicHenry.csv&quot;)
+partyDF2 &lt;- read.csv(&quot;datasets/party_2021Mar09_Cohen.csv&quot;)</code></pre>
+</div>
+<div id="making-columns-identical-for-beverage-tweets" class="section level2">
+<h2>Making columns identical for Beverage tweets</h2>
+<pre class="r"><code>beverageDF1 &lt;- beverageDF1[1:10]
+beverageDF2 &lt;- beverageDF2[1:10]
+
+names(beverageDF1)[6] &lt;- &quot;favourite_count&quot;</code></pre>
+</div>
+<div id="making-columns-identical-for-beer-tweets" class="section level2">
+<h2>Making columns identical for Beer tweets</h2>
+<pre class="r"><code>beerDF1 &lt;- beerDF1[1:10]
+beerDF2 &lt;- beerDF2[1:10]
+
+names(beerDF1)[6] &lt;- &quot;favourite_count&quot;</code></pre>
+</div>
+<div id="making-columns-identical-for-concert-tweets" class="section level2">
+<h2>Making columns identical for Concert tweets</h2>
+<pre class="r"><code>concertDF1 &lt;- concertDF1[1:10]
+concertDF2 &lt;- concertDF2[1:10]
+
+names(concertDF1)[6] &lt;- &quot;favourite_count&quot;</code></pre>
+</div>
+<div id="making-columns-identical-for-party-tweets" class="section level2">
+<h2>Making columns identical for Party tweets</h2>
+<pre class="r"><code>partyDF1 &lt;- partyDF1[1:10]
+partyDF2 &lt;- partyDF2[1:10]
+
+names(partyDF1)[6] &lt;- &quot;favourite_count&quot;</code></pre>
+</div>
+<div id="merging-datasets" class="section level1">
+<h1>Merging datasets</h1>
+<pre class="r"><code>mergedBeverageTweets&lt;- rbind(beverageDF1, beverageDF2)
+mergedBeerTweets &lt;- rbind(beerDF1, beerDF2)
+mergedConcertTweets&lt;- rbind(concertDF1, concertDF2)
+mergedPartyTweets &lt;- rbind(partyDF1, partyDF2)</code></pre>
+</div>
+<div id="removing-duplicate-tweets" class="section level1">
+<h1>Removing duplicate tweets</h1>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+## ✓ tibble  3.1.0     ✓ dplyr   1.0.4
+## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.1</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x ggplot2::annotate() masks NLP::annotate()
+## x dplyr::filter()     masks stats::filter()
+## x dplyr::lag()        masks stats::lag()</code></pre>
+<pre class="r"><code>mergedBeerTweets &lt;- mergedBeerTweets[!duplicated(mergedBeerTweets$text),]
+mergedBeverageTweets &lt;- mergedBeverageTweets[!duplicated(mergedBeerTweets$text),]
+mergedConcertTweets &lt;- mergedConcertTweets[!duplicated(mergedConcertTweets$text),]
+mergedPartyTweets &lt;- mergedPartyTweets[!duplicated(mergedPartyTweets$text),]</code></pre>
+</div>
+<div id="descriptive-statistics" class="section level1">
+<h1>Descriptive Statistics</h1>
+<div id="concert-statistics" class="section level2">
+<h2>Concert statistics</h2>
+<pre class="r"><code>summary(mergedConcertTweets)</code></pre>
+<pre><code>##        X            text           screen_name           user_id         
+##  Min.   :   1   Length:9243        Length:9243        Min.   :1.621e+03  
+##  1st Qu.:1162   Class :character   Class :character   1st Qu.:2.433e+09  
+##  Median :2328   Mode  :character   Mode  :character   Median :1.257e+18  
+##  Mean   :2740                                         Mean   :8.859e+17  
+##  3rd Qu.:3796                                         3rd Qu.:1.371e+18  
+##  Max.   :7055                                         Max.   :1.371e+18  
+##                                                                          
+##   created_at        favourite_count    retweet_count        location        
+##  Length:9243        Min.   :   0.000   Min.   :     0.0   Length:9243       
+##  Class :character   1st Qu.:   0.000   1st Qu.:     0.0   Class :character  
+##  Mode  :character   Median :   0.000   Median :     0.0   Mode  :character  
+##                     Mean   :   6.673   Mean   :   178.1                     
+##                     3rd Qu.:   1.000   3rd Qu.:     0.0                     
+##                     Max.   :2446.000   Max.   :490548.0                     
+##                                                                             
+##  followers_count     friends_count   
+##  Min.   :        0   Min.   :     0  
+##  1st Qu.:      146   1st Qu.:   217  
+##  Median :      434   Median :   485  
+##  Mean   :    28923   Mean   :  1005  
+##  3rd Qu.:     1220   3rd Qu.:  1002  
+##  Max.   :109557052   Max.   :107601  
+##  NA&#39;s   :44          NA&#39;s   :44</code></pre>
+</div>
+<div id="beer-statistics" class="section level2">
+<h2>Beer statistics</h2>
+<pre class="r"><code>summary(mergedBeerTweets)</code></pre>
+<pre><code>##        X            text           screen_name           user_id         
+##  Min.   :   1   Length:12703       Length:12703       Min.   :3.677e+05  
+##  1st Qu.:1589   Class :character   Class :character   1st Qu.:1.311e+09  
+##  Median :3178   Mode  :character   Mode  :character   Median :1.371e+18  
+##  Mean   :3196                                         Mean   :8.944e+17  
+##  3rd Qu.:4766                                         3rd Qu.:1.371e+18  
+##  Max.   :6829                                         Max.   :1.371e+18  
+##                                                                          
+##   created_at        favourite_count    retweet_count        location        
+##  Length:12703       Min.   :    0.00   Min.   :    0.00   Length:12703      
+##  Class :character   1st Qu.:    0.00   1st Qu.:    0.00   Class :character  
+##  Mode  :character   Median :    0.00   Median :    0.00   Mode  :character  
+##                     Mean   :    5.68   Mean   :   11.03                     
+##                     3rd Qu.:    1.00   3rd Qu.:    0.00                     
+##                     Max.   :43885.00   Max.   :26496.00                     
+##                                                                             
+##  followers_count   friends_count     
+##  Min.   :      0   Min.   :     0.0  
+##  1st Qu.:     83   1st Qu.:   198.0  
+##  Median :    247   Median :   460.0  
+##  Mean   :   3200   Mean   :   977.8  
+##  3rd Qu.:    790   3rd Qu.:   979.0  
+##  Max.   :6572454   Max.   :332466.0  
+##  NA&#39;s   :30        NA&#39;s   :30</code></pre>
+</div>
+<div id="beverage-statistics" class="section level2">
+<h2>Beverage statistics</h2>
+<pre class="r"><code>summary(mergedBeverageTweets)</code></pre>
+<pre><code>##        X            text           screen_name           user_id         
+##  Min.   :   1   Length:13075       Length:13075       Min.   :3.097e+04  
+##  1st Qu.:1635   Class :character   Class :character   1st Qu.:2.358e+09  
+##  Median :3269   Mode  :character   Mode  :character   Median :1.345e+18  
+##  Mean   :3280                                         Mean   :8.977e+17  
+##  3rd Qu.:4904                                         3rd Qu.:1.369e+18  
+##  Max.   :6919                                         Max.   :1.371e+18  
+##                                                                          
+##   created_at        favourite_count    retweet_count        location        
+##  Length:13075       Min.   :   0.000   Min.   :    0.00   Length:13075      
+##  Class :character   1st Qu.:   0.000   1st Qu.:    0.00   Class :character  
+##  Mode  :character   Median :   1.000   Median :    0.00   Mode  :character  
+##                     Mean   :   3.713   Mean   :   39.51                     
+##                     3rd Qu.:   2.000   3rd Qu.:    0.00                     
+##                     Max.   :1755.000   Max.   :76799.00                     
+##                                                                             
+##  followers_count    friends_count   
+##  Min.   :       0   Min.   :     0  
+##  1st Qu.:     118   1st Qu.:   154  
+##  Median :     463   Median :   455  
+##  Mean   :   16951   Mean   :  1691  
+##  3rd Qu.:    1776   3rd Qu.:  1146  
+##  Max.   :12504192   Max.   :649447  
+##  NA&#39;s   :66         NA&#39;s   :66</code></pre>
+</div>
+<div id="party-statistics" class="section level2">
+<h2>Party statistics</h2>
+<pre class="r"><code>summary(mergedPartyTweets)</code></pre>
+<pre><code>##        X            text           screen_name           user_id         
+##  Min.   :   1   Length:10347       Length:10347       Min.   :2.349e+04  
+##  1st Qu.:1294   Class :character   Class :character   1st Qu.:3.090e+09  
+##  Median :2588   Mode  :character   Mode  :character   Median :1.300e+18  
+##  Mean   :2699                                         Mean   :9.225e+17  
+##  3rd Qu.:3882                                         3rd Qu.:1.369e+18  
+##  Max.   :6248                                         Max.   :1.369e+18  
+##                                                                          
+##   created_at        favourite_count   retweet_count         location        
+##  Length:10347       Min.   :  0.000   Min.   :     0.00   Length:10347      
+##  Class :character   1st Qu.:  0.000   1st Qu.:     0.00   Class :character  
+##  Mode  :character   Median :  0.000   Median :     0.00   Mode  :character  
+##                     Mean   :  1.739   Mean   :    72.39                     
+##                     3rd Qu.:  0.500   3rd Qu.:     0.00                     
+##                     Max.   :793.000   Max.   :231238.00                     
+##                                                                             
+##  followers_count   friends_count   
+##  Min.   :      0   Min.   :     0  
+##  1st Qu.:     87   1st Qu.:   167  
+##  Median :    384   Median :   492  
+##  Mean   :   8228   Mean   :  1446  
+##  3rd Qu.:   1204   3rd Qu.:  1184  
+##  Max.   :9969979   Max.   :277457  
+##  NA&#39;s   :92        NA&#39;s   :92</code></pre>
+</div>
+</div>
+<div id="sentiment-analysis" class="section level1">
+<h1>Sentiment Analysis</h1>
+<div id="dominant-emotion-in-canada" class="section level2">
+<h2>Dominant Emotion in Canada</h2>
+<pre class="r"><code>canadaTweets &lt;- mergedBeverageTweets[mergedBeverageTweets$location == &#39;Canada&#39;, &quot;text&quot;]
+canadaTweets &lt;- gsub(&quot;https.*&quot;,&quot;&quot;, canadaTweets)
+canadaTweets &lt;- gsub(&quot;#.*&quot;,&quot;&quot;, canadaTweets)
+canadaTweets &lt;- gsub(&quot;@.*&quot;,&quot;&quot;, canadaTweets)
+canadaTweets &lt;- gsub(&quot;[^\x01-\x7F]&quot;, &quot;&quot;, canadaTweets)
+canadaEmotions &lt;- get_nrc_sentiment(canadaTweets)
+
+canadaTweets.data &lt;- cbind (canadaTweets, canadaEmotions)
+
+canada.anticipation &lt;- sum(canadaEmotions$anticipation)
+canada.anger &lt;- sum(canadaEmotions$anger)
+canada.disgust &lt;- sum(canadaEmotions$disgust)
+canada.fear &lt;- sum(canadaEmotions$fear)
+canada.joy &lt;- sum(canadaEmotions$joy)
+canada.sadness &lt;- sum(canadaEmotions$sadness)
+canada.surprise &lt;- sum(canadaEmotions$surprise)
+canada.trust &lt;- sum(canadaEmotions$trust)</code></pre>
+<p>These results indicate that the dominant emotions in Canada are Trust and Joy, the scores were 12 and 11 respectively.</p>
+</div>
+<div id="dominant-emotion-in-the-united-states" class="section level2">
+<h2>Dominant Emotion in the United States</h2>
+<pre class="r"><code>unitedStatesTweets &lt;- mergedBeverageTweets[mergedBeverageTweets$location == &#39;United States&#39;, &quot;text&quot;]
+unitedStatesTweets &lt;- gsub(&quot;https.*&quot;,&quot;&quot;, unitedStatesTweets)
+unitedStatesTweets &lt;- gsub(&quot;#.*&quot;,&quot;&quot;, unitedStatesTweets)
+unitedStatesTweets &lt;- gsub(&quot;@.*&quot;,&quot;&quot;, unitedStatesTweets)
+unitedStatesTweets &lt;- gsub(&quot;[^\x01-\x7F]&quot;, &quot;&quot;, unitedStatesTweets)
+unitedStatesEmotions &lt;- get_nrc_sentiment(unitedStatesTweets)
+
+unitedStatesTweets.data &lt;- cbind (unitedStatesTweets, unitedStatesEmotions)
+
+unitedStates.anticipation &lt;- sum(unitedStatesEmotions$anticipation)
+unitedStates.anger &lt;- sum(unitedStatesEmotions$anger)
+unitedStates.disgust &lt;- sum(unitedStatesEmotions$disgust)
+unitedStates.fear &lt;- sum(unitedStatesEmotions$fear)
+unitedStates.joy &lt;- sum(unitedStatesEmotions$joy)
+unitedStates.sadness &lt;- sum(unitedStatesEmotions$sadness)
+unitedStates.surprise &lt;- sum(unitedStatesEmotions$surprise)
+unitedStates.trust &lt;- sum(unitedStatesEmotions$trust)</code></pre>
+<p>These results indicate that the dominant emotions in Canada are Trust and Joy, both scores were 50.</p>
+</div>
+<div id="dominant-emotion-in-beverage-dataset" class="section level2">
+<h2>Dominant emotion in beverage dataset</h2>
+<pre class="r"><code>beverageDf.text &lt;- gsub(&quot;http.*&quot;,&quot;&quot;,mergedBeverageTweets$text)
+beverageDf.text &lt;- gsub(&quot;https.*&quot;,&quot;&quot;, beverageDf.text)
+beverageDf.text &lt;- gsub(&quot;#.*&quot;,&quot;&quot;, beverageDf.text)
+beverageDf.text &lt;- gsub(&quot;@.*&quot;,&quot;&quot;, beverageDf.text)
+beverageDf.text &lt;- gsub(&quot;[^\x01-\x7F]&quot;, &quot;&quot;, beverageDf.text)
+beverageDf.emotions &lt;- get_nrc_sentiment(beverageDf.text)</code></pre>
+<pre class="r"><code>colSums(beverageDf.emotions)</code></pre>
+<pre><code>##        anger anticipation      disgust         fear          joy      sadness 
+##         1624         3511          845         1465         4349         1362 
+##     surprise        trust     negative     positive 
+##         1397         5063         3305        14577</code></pre>
+<p>According to the column sums, the dominant emotions in the Beverage dataset are Trust and Joy.</p>
+</div>
+<div id="overall-sentiments-in-tweets-regarding-the-word-beverage" class="section level2">
+<h2>Overall sentiments in tweets regarding the word “beverage”</h2>
+<pre class="r"><code>beverageSentiment &lt;- mean(get_sentiment(beverageDf.text))
+print(beverageSentiment)</code></pre>
+<pre><code>## [1] 0.3682294</code></pre>
+<p>From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0.</p>
+</div>
+<div id="overall-sentiments-in-tweets-regarding-the-word-concert" class="section level2">
+<h2>Overall sentiments in tweets regarding the word “concert”</h2>
+<pre class="r"><code>concertDF.text &lt;- gsub(&quot;http.*&quot;,&quot;&quot;,mergedConcertTweets$text)
+concertDF.text &lt;- gsub(&quot;https.*&quot;,&quot;&quot;, concertDF.text)
+concertDF.text &lt;- gsub(&quot;#.*&quot;,&quot;&quot;, concertDF.text)
+concertDF.text &lt;- gsub(&quot;@.*&quot;,&quot;&quot;, concertDF.text)
+concertDF.text &lt;- gsub(&quot;[^\x01-\x7F]&quot;, &quot;&quot;, concertDF.text)
+
+concertSentiment &lt;- mean(get_sentiment(concertDF.text))
+print(concertSentiment)</code></pre>
+<pre><code>## [1] 0.1888186</code></pre>
+<p>From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0.</p>
 </div>
 <div id="preparing-consumer-structured-data" class="section level2">
 <h2>Preparing consumer structured data</h2>
@@ -195,6 +459,7 @@ pre code {
 </div>
 <div id="beverage-unit-prediction" class="section level2">
 <h2>Beverage unit Prediction</h2>
+</div>
 </div>
 
 

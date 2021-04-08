@@ -3,14 +3,14 @@ title: "Project Part 02"
 author: "Dominic Henry | Dineah Cohen"
 date: "4/2/2021"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ## Authors' Information
 
-- Dominic Henry - 620118591   
+- Dominic Henry - 620118591
 - Dineah Cohen - 620117662
 
 ## Tweet Data Analysis
@@ -18,6 +18,24 @@ output:
 library("SnowballC")
 library("tm")
 library("syuzhet")
+```
+
+## Reading Datasets
+
+```{r}
+
+beverageDF1 <- read.csv("datasets/beverage_2021Mar08_DominicHenry.csv")
+beverageDF2 <- read.csv("datasets/beverage_2021Mar13_Cohen.csv")
+
+beerDF1 <- read.csv("datasets/beer_2021Mar13_DominicHenry.csv")
+beerDF2 <- read.csv("datasets/beer_2021Mar08_Cohen.csv")
+
+concertDF1 <- read.csv("datasets/concert_2021Mar14_DominicHenry.csv")
+concertDF2 <- read.csv("datasets/concert_2021Mar14_Cohen.csv")
+
+partyDF1 <- read.csv("datasets/party_2021Mar09_DominicHenry.csv")
+partyDF2 <- read.csv("datasets/party_2021Mar09_Cohen.csv")
+
 ```
 
 ## Making columns identical for Beverage tweets
@@ -116,7 +134,7 @@ canada.surprise <- sum(canadaEmotions$surprise)
 canada.trust <- sum(canadaEmotions$trust)
 ```
 
-These results indicate that the dominant emotions in Canada are Trust and Joy, the scores were 12 and 11 respectively. 
+These results indicate that the dominant emotions in Canada are Trust and Joy, the scores were 12 and 11 respectively.
 
 ## Dominant Emotion in the United States
 ```{r}
@@ -161,7 +179,7 @@ According to the column sums, the dominant emotions in the Beverage dataset are 
 beverageSentiment <- mean(get_sentiment(beverageDf.text))
 print(beverageSentiment)
 ```
-From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0. 
+From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0.
 
 
 ## Overall sentiments in tweets regarding the word "concert"
@@ -175,11 +193,186 @@ concertDF.text <- gsub("[^\x01-\x7F]", "", concertDF.text)
 concertSentiment <- mean(get_sentiment(concertDF.text))
 print(concertSentiment)
 ```
-From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0. 
-
+From the sentiment score it can be deduced that the sentiment is Positive. This is due to the score being greater than 0.
 
 
 ## Preparing consumer structured data
+
+### Reading consumer dataset
+
+```{r}
+
+consumerDF <- read.csv("datasets/consumer_pt02_2021.csv.csv")
+
+```
+
+### Data Exploration of consumer dataset
+
+```{r}
+
+summary(consumerDF)
+
+```
+Various numerical fields are character fields, which need to be converted to perform proper data manipulation.
+
+**Fields that need to be formatted**
+
+- Unit.Cost
+- Total.Revenue
+- Units.Sold
+- Unit.Price
+- Total.Cost
+- Total.Profit
+
+```{r}
+
+consumerDF$Unit.Cost <- as.double(consumerDF$Unit.Cost)
+consumerDF$Total.Revenue <- as.double(consumerDF$Total.Revenue)
+consumerDF$Units.Sold <- as.integer(consumerDF$Units.Sold)
+consumerDF$Unit.Price <- as.double(consumerDF$Unit.Price)
+consumerDF$Total.Cost <- as.double(consumerDF$Total.Cost)
+consumerDF$Total.Profit <- as.double(consumerDF$Total.Profit)
+
+summary(consumerDF)
+
+```
+Many of the rows also contain missing values, which either need to be updated or removed if necessary to perform analysis.
+
+### Checking for possible outliers in dataset
+
+**Using histograms**
+```{r}
+
+hist(consumerDF$Unit.Cost)
+hist(consumerDF$Total.Revenue)
+hist(consumerDF$Units.Sold)
+hist(consumerDF$Unit.Price)
+hist(consumerDF$Total.Cost)
+hist(consumerDF$Total.Profit)
+
+```
+
+No apparent outliers
+
+**Using boxplots**
+
+```{r}
+
+boxplot(consumerDF$Unit.Cost, horizontal=T)
+boxplot(consumerDF$Total.Revenue, horizontal=T)
+boxplot(consumerDF$Units.Sold, horizontal=T)
+boxplot(consumerDF$Unit.Price, horizontal=T)
+boxplot(consumerDF$Total.Cost, horizontal=T)
+boxplot(consumerDF$Total.Profit, horizontal=T)
+
+```
+
+Based on the boxplots we can more accurately see outliers present in the
+attributes for `Total.Revenue`, `Total.Cost` and `Total.Profit`
+
+### Cleaning Dataset
+
+**Removing Records**
+
+Excluding records that don't have Unit.Price, Units.Sold, Unit.Cost. These
+fields are required to compute other attributes within the dataset such as
+Total.Cost, Total.Revenue and Total.Profit.
+
+```{r}
+
+consumerDF <- consumerDF[!is.na(consumerDF$Unit.Price),]
+consumerDF <- consumerDF[!is.na(consumerDF$Units.Sold),]
+consumerDF <- consumerDF[!is.na(consumerDF$Unit.Cost),]
+
+summary(consumerDF)
+
+```
+
+**Updating Calculated Fields**
+
+Calculating Total Revenue for records with missing values
+
+```{r}
+
+consumerDF$Total.Revenue[is.na(consumerDF$Total.Revenue)] <- consumerDF$Units.Sold[is.na(consumerDF$Total.Revenue)] * consumerDF$Unit.Price[is.na(consumerDF$Total.Revenue)]
+
+```
+
+Calculating Total Cost for records with missing values
+
+```{r}
+
+consumerDF$Total.Cost[is.na(consumerDF$Total.Cost)] <- consumerDF$Units.Sold[is.na(consumerDF$Total.Cost)] * consumerDF$Unit.Cost[is.na(consumerDF$Total.Cost)]
+
+```
+
+Calculating Total Profit for records with missing values
+
+```{r}
+
+consumerDF$Total.Profit[is.na(consumerDF$Total.Profit)] <- consumerDF$Total.Revenue[is.na(consumerDF$Total.Profit)] * consumerDF$Total.Cost[is.na(consumerDF$Total.Profit)]
+
+```
+
+**Looking at summary data for updated fields**
+
+```{r}
+
+summary(consumerDF$Total.Revenue)
+summary(consumerDF$Total.Cost)
+summary(consumerDF$Total.Profit)
+
+```
+
+All fields updated, so no missing values are present in dataset, for further
+calculations.
+
+**Why Records with outliers are not being fixed**
+
+Based on the dataset there are different categories of consumer products being
+compared, thus their will be different values present in the dataset that may
+on average cost more than certain consumer items, but may be average if compared
+in the same category.
+
+```{r}
+
+unique(factor(consumerDF$X))
+
+```
+
+### Dataset Reformating
+
+**Updating column name X to be Consumer.Category**
+
+This is being done so that the column accurately represents what is being stored
+in that attribute field.
+
+```{r}
+
+consumerDF$Consumer.Category <- factor(consumerDF$X)
+consumerDF$X <- NULL
+
+```
+
+**Updating various columns to be factors**
+
+```{r}
+
+consumerDF$Country <- factor(consumerDF$Country)
+consumerDF$Sales.Channel <- factor(consumerDF$Sales.Channel)
+consumerDF$Order.Priority <- factor(consumerDF$Order.Priority)
+
+```
+
+### Final Summary of Consumer Data
+
+```{r}
+
+summary(consumerDF)
+
+```
+
+Missing values have been removed, and dataset columns have been formatted.
 
 ## Structured Data Analysis/Modeling
 

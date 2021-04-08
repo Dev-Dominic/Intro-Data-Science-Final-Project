@@ -122,19 +122,36 @@ canadaTweets <- gsub("@.*","", canadaTweets)
 canadaTweets <- gsub("[^\x01-\x7F]", "", canadaTweets)
 canadaEmotions <- get_nrc_sentiment(canadaTweets)
 
+# Putting each tweet with its score
 canadaTweets.data <- cbind (canadaTweets, canadaEmotions)
 
 canada.anticipation <- sum(canadaEmotions$anticipation)
+cat("Canada anticipation score: ", canada.anticipation, "\n")
+
 canada.anger <- sum(canadaEmotions$anger)
+cat("Canada anger score: ", canada.anger, "\n")
+
 canada.disgust <- sum(canadaEmotions$disgust)
+cat("Canada disgust score: ", canada.disgust, "\n")
+
 canada.fear <- sum(canadaEmotions$fear)
+cat("Canada fear score: ", canada.fear, "\n")
+
 canada.joy <- sum(canadaEmotions$joy)
+cat("Canada joy score: ", canada.joy, "\n")
+
 canada.sadness <- sum(canadaEmotions$sadness)
+cat("Canada sadness score: ", canada.sadness, "\n")
+
 canada.surprise <- sum(canadaEmotions$surprise)
+cat("Canada surprise score: ", canada.surprise, "\n")
+
 canada.trust <- sum(canadaEmotions$trust)
+cat("Canada trust score: ", canada.trust, "\n")
 ```
 
 These results indicate that the dominant emotions in Canada are Trust and Joy, the scores were 12 and 11 respectively.
+
 
 ## Dominant Emotion in the United States
 ```{r}
@@ -148,16 +165,32 @@ unitedStatesEmotions <- get_nrc_sentiment(unitedStatesTweets)
 unitedStatesTweets.data <- cbind (unitedStatesTweets, unitedStatesEmotions)
 
 unitedStates.anticipation <- sum(unitedStatesEmotions$anticipation)
+cat("United States anticipation score: ", unitedStates.anticipation, "\n")
+
 unitedStates.anger <- sum(unitedStatesEmotions$anger)
+cat("United States anger score: ", unitedStates.anger, "\n")
+
 unitedStates.disgust <- sum(unitedStatesEmotions$disgust)
+cat("United States disgust score: ", unitedStates.disgust, "\n")
+
 unitedStates.fear <- sum(unitedStatesEmotions$fear)
+cat("United States fear score: ", unitedStates.fear, "\n")
+
 unitedStates.joy <- sum(unitedStatesEmotions$joy)
+cat("United States joy score: ", unitedStates.joy, "\n")
+
 unitedStates.sadness <- sum(unitedStatesEmotions$sadness)
+cat("United States sadness score: ", unitedStates.sadness, "\n")
+
 unitedStates.surprise <- sum(unitedStatesEmotions$surprise)
+cat("United States surprise score: ", unitedStates.surprise, "\n")
+
 unitedStates.trust <- sum(unitedStatesEmotions$trust)
+cat("United States trust score: ", unitedStates.trust, "\n")
 ```
 
-These results indicate that the dominant emotions in Canada are Trust and Joy, both scores were 50.
+These results indicate that the dominant emotions in the United States are Trust and Joy, both scores were 50.
+
 
 ## Dominant emotion in beverage dataset
 ```{r}
@@ -173,6 +206,7 @@ beverageDf.emotions <- get_nrc_sentiment(beverageDf.text)
 colSums(beverageDf.emotions)
 ```
 According to the column sums, the dominant emotions in the Beverage dataset are Trust and Joy.
+
 
 ## Overall sentiments in tweets regarding the word "beverage"
 ```{r}
@@ -382,10 +416,55 @@ Filtering out Consumer Categories to only have beverages.
 
 consumerDF <- consumerDF[consumerDF$Consumer.Category == "Beverages",]
 nrow(consumerDF)
+View(consumerDF)
 
 ```
 
 Number of records that fall under Beverages category is: `r nrow(consumerDF)`
+
+
+## Average spent on beverages in each country
+
+```{r}
+uniqueCountries <- unique(consumerDF$Country)
+
+for (country in uniqueCountries){
+  cat(country, " - ", mean(consumerDF$Total.Cost[consumerDF$Country == country ]), "\n")
+}
+```
+
+## Country that has the highest spending on beverages
+Determining the country which spends the most on beverage requires the sum of the Total.Cost
+for each country
+```{r}
+# Sum of total costs for beverages per country
+beverageCostSum <- aggregate (consumerDF$Total.Cost, by= list(consumerDF$Country), FUN= sum)
+
+# Getting the maximum total cost
+beverageCostSum$Group.1[which.max(beverageCostSum$x)]
+```
+
+Based on the findings above, Yemen has highest spending cost for beverages.
+
+
+## Country that consumes the most beverages
+
+Determining the country which consumes the most beverage requires the sum of the Units.Sold
+for each country
+```{r}
+beveragesConsumed <- aggregate (consumerDF$Units.Sold, by= list(consumerDF$Country), FUN= sum)
+beveragesConsumed$Group.1[which.max(beveragesConsumed$x)]
+```
+From the results it shows that Yemen is also the country with the highest consumption of beverages.
+
+
+## Average profit from sale of beverages in each country
+```{r}
+for (country in uniqueCountries){
+  cat(country,":", mean(consumerDF$Total.Profit[consumerDF$Country == country]),"\n")
+}
+```
+
 
 ## Recommendations
 
